@@ -7,7 +7,7 @@
 #include "proc.h"
 
 extern struct ptable ptable;
-
+extern int inctable[35];
 int
 sys_fork(void)
 {
@@ -87,6 +87,44 @@ sys_sbrk(void)
     return -1;
   return addr;
 }
+
+int sys_getcount(void){
+  int syscall;
+  argint(0, &syscall) < 0;
+
+  return inctable[syscall - 1];
+}
+
+int
+sys_killrandom(void)
+{
+  int usedpr[NPROC]={0};
+  acquire(&ptable.lock);
+  struct proc *p;
+  int incr = 0;
+  for (p = ptable.proc; p != &(ptable.proc[NPROC]); p++) 
+    {
+        if(p->state != UNUSED) {
+          usedpr[incr]=p->pid;
+          incr++;
+        }
+    }
+  release(&ptable.lock);
+  int rd_pid = rand() % incr;  
+  cprintf("Killing PID %d\n", usedpr[rd_pid]);
+  return kill(usedpr[rd_pid]);
+ 
+}
+
+int sys_getfavnum(void)
+{
+return 67;
+}
+
+void sys_halt(void){
+outw(0x604, 0x2000);
+}
+
 
 int
 sys_sleep(void)

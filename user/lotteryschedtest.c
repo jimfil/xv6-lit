@@ -7,6 +7,7 @@ int tickets[N] = {200, 100, 500, 50, 150};
 int children[N];
 struct pstat pstat;
 int lottery;
+int settickets(int number);
 
 int pindex(struct pstat *pstat, int pid) {
     for (int i = 0; i < NPROC; i++) {

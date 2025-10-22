@@ -20,5 +20,9 @@
 #define SYS_link   19
 #define SYS_mkdir  20
 #define SYS_close  21
+#define SYS_getfavnum 22
+#define SYS_halt 23
 #define SYS_getpinfo 24
+#define SYS_getcount 25
+#define SYS_killrandom 26
 #define SYS_settickets 27

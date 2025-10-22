@@ -23,7 +23,12 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+int getfavnum(void);
+void halt(void);
 int getpinfo(struct pstat*);
+int killrandom(void);
+int getcount(int syscall);
+
 
 // ulib.c
 int stat(char*, struct stat*);

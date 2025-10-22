@@ -14,6 +14,7 @@
 // to a saved program counter, and then the first argument.
 
 // Fetch the int at addr from the current process.
+int inctable[32] ={0};
 int
 fetchint(uintp addr, int *ip)
 {
@@ -145,6 +146,10 @@ extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_getpinfo(void);
 extern int sys_settickets(void);
+extern int sys_halt(void);
+extern int sys_getfavnum(void);
+extern int sys_killrandom(void);
+extern int sys_getcount(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -169,16 +174,21 @@ static int (*syscalls[])(void) = {
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
 [SYS_getpinfo]    sys_getpinfo,
-[SYS_settickets]    sys_settickets
+[SYS_settickets]    sys_settickets,
+[SYS_getfavnum] sys_getfavnum,
+[SYS_halt] sys_halt,
+[SYS_killrandom]    sys_killrandom,
+[SYS_getcount] sys_getcount
 };
 
 void
 syscall(void)
 {
   int num;
-
+  srand(ticks);
   num = proc->tf->eax;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
+  inctable[num]++;
     proc->tf->eax = syscalls[num]();
   } else {
     cprintf("%d %s: unknown sys call %d\n",
