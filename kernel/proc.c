@@ -36,10 +36,10 @@ int totaltickets(void)      // thelei acquire lock prin kathe klhsh ths
   int ttickets = 0;
   for (p = ptable.proc; p != &(ptable.proc[NPROC]); p++) 
     {
-      if(p->state == RUNNABLE ) ttickets += p->tickets;
+      if(p->state == RUNNABLE | p->state == RUNNING | p->inuse)  ttickets += p->tickets;
     }
   if (ttickets==0) ttickets=1;
-  else cprintf("\n%d",ttickets);
+  //else cprintf("\n%d",ttickets);
   return ttickets;
 }
 
@@ -71,7 +71,7 @@ found:
   p->state = EMBRYO;
   p->pid = nextpid++;
   p->ticks = 0;
-  p->tickets = 10;                      // note : arxikopoioume ta tickets 
+  p->tickets = 20;                      // note : arxikopoioume ta tickets 
   release(&ptable.lock);
 
   // Allocate kernel stack.
@@ -311,6 +311,7 @@ scheduler(void)
       // before jumping back to us.
       proc = p;
       switchuvm(p);
+      //cprintf("\n pid:%d tickets:%d \n",proc->pid , proc->tickets);
       p->state = RUNNING;
       p->inuse = 1;
 
