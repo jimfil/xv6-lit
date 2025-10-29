@@ -159,3 +159,20 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+void 
+sys_settickets(void)
+{
+  struct proc *p;
+  int noTickets;
+  argint(0, &noTickets);
+  acquire(&ptable.lock);
+  for (p = ptable.proc; p != &(ptable.proc[NPROC]); p++) 
+    {
+      if(p->state == RUNNING) {
+          p->tickets = noTickets;
+        }
+    }
+  release(&ptable.lock);  
+  //proc->tickets = noTickets;
+}

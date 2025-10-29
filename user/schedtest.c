@@ -62,7 +62,7 @@ find_pid(struct pstat *pstat, int pid)
 }
 
 // Uncomment the below line after you've implemented the "settickets" system call
-// #define TICKETS 
+#define TICKETS 
 
 int
 main(int argc, char *argv[])
@@ -78,9 +78,9 @@ main(int argc, char *argv[])
 #endif
 
     int i; 
-    for (i = 1; i < N_C_PROCS; i++) 
+    for (i = 1; i < N_C_PROCS; i++)                 //dhmiourgia 2 children
     {
-        if ((pid_chds[i] = fork()) == 0) 
+        if ((pid_chds[i] = fork()) == 0)            
         {
 #ifdef TICKETS
             settickets(n_tickets[i]);

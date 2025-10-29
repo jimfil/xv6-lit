@@ -17,6 +17,32 @@ extern void trapret(void);
 
 static void wakeup1(void *chan);
 
+static unsigned long int next = 1;  // NB: "unsigned long int" is assumed to be 32 bits wide
+
+int rand(void)  // RAND_MAX assumed to be 32767
+{
+    next = next * 1103515245 + 12345;
+    return (unsigned int) (next / 65536) % 32768;
+}
+
+void srand(unsigned int seed)
+{
+    next = seed;
+}
+
+int totaltickets(void)      // thelei acquire lock prin kathe klhsh ths
+{
+  struct proc *p;
+  int ttickets = 0;
+  for (p = ptable.proc; p != &(ptable.proc[NPROC]); p++) 
+    {
+      if(p->state == RUNNABLE ) ttickets += p->tickets;
+    }
+  if (ttickets==0) ttickets=1;
+  else cprintf("\n%d",ttickets);
+  return ttickets;
+}
+
 void
 pinit(void)
 {
@@ -45,6 +71,7 @@ found:
   p->state = EMBRYO;
   p->pid = nextpid++;
   p->ticks = 0;
+  p->tickets = 10;                      // note : arxikopoioume ta tickets 
   release(&ptable.lock);
 
   // Allocate kernel stack.
@@ -145,6 +172,7 @@ fork(void)
   np->sz = proc->sz;
   np->parent = proc;
   *np->tf = *proc->tf;
+  np->tickets = proc->tickets;
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
@@ -272,8 +300,10 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+    int winnerNumero = rand()%totaltickets() + 1;
+    int count = 0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
+      if(p->state != RUNNABLE | (count+= p->tickets) < winnerNumero)
         continue;
 
       // Switch to chosen process.  It is the process's job
@@ -320,6 +350,7 @@ sched(void)
 void
 yield(void)
 {
+  srand(ticks);
   acquire(&ptable.lock);  //DOC: yieldlock
   proc->state = RUNNABLE;
   sched();
@@ -467,15 +498,3 @@ procdump(void)
     cprintf("\n\n");
 }
 
-static unsigned long int next = 1;  // NB: "unsigned long int" is assumed to be 32 bits wide
-
-int rand(void)  // RAND_MAX assumed to be 32767
-{
-    next = next * 1103515245 + 12345;
-    return (unsigned int) (next / 65536) % 32768;
-}
-
-void srand(unsigned int seed)
-{
-    next = seed;
-}

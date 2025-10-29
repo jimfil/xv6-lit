@@ -185,7 +185,7 @@ void
 syscall(void)
 {
   int num;
-  srand(ticks);
+
   num = proc->tf->eax;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
   inctable[num]++;
@@ -197,6 +197,3 @@ syscall(void)
   }
 }
 
-int sys_settickets(void) {
-    return -1;
-}
