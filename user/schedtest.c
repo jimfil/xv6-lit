@@ -70,7 +70,7 @@ main(int argc, char *argv[])
 
     int pid_chds[N_C_PROCS];
 
-    int n_tickets[N_C_PROCS]={2,1,300};
+    int n_tickets[N_C_PROCS]={10,1,100};
     pid_chds[0] = getpid();
 
 #ifdef TICKETS
