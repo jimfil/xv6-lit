@@ -17,6 +17,19 @@ extern void trapret(void);
 
 static void wakeup1(void *chan);
 
+static unsigned long int next = 1;  // NB: "unsigned long int" is assumed to be 32 bits wide
+
+int rand(void)  // RAND_MAX assumed to be 32767
+{
+    next = next * 1103515245 + 65536;
+    return (unsigned int) (next / 65536) % 32768;
+}
+
+void srand(unsigned int seed)
+{
+    next = seed;
+}
+
 void
 pinit(void)
 {
@@ -45,6 +58,7 @@ found:
   p->state = EMBRYO;
   p->pid = nextpid++;
   p->ticks = 0;
+  p->tickets = 20;                      // note : arxikopoioume ta tickets 
   release(&ptable.lock);
 
   // Allocate kernel stack.
@@ -76,6 +90,7 @@ found:
 void
 userinit(void)
 {
+  
   struct proc *p;
   extern char _binary_out_initcode_start[], _binary_out_initcode_size[];
   
@@ -145,6 +160,7 @@ fork(void)
   np->sz = proc->sz;
   np->parent = proc;
   *np->tf = *proc->tf;
+  np->tickets = proc->tickets;
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
@@ -232,6 +248,7 @@ wait(void)
         p->parent = 0;
         p->name[0] = 0;
         p->killed = 0;
+        p->tickets = 0;
         release(&ptable.lock);
         return pid;
       }
@@ -248,6 +265,19 @@ wait(void)
   }
 }
 
+int totaltickets(void)      // thelei acquire lock prin kathe klhsh ths
+{
+  struct proc *p;
+  int ttickets = 0;
+  for (p = ptable.proc; p != &(ptable.proc[NPROC]); p++) 
+    {
+      if(p->state == RUNNABLE) { 
+        ttickets += p->tickets;
+        //cprintf("\tPID:%d\t Tickets:%d\n",p->pid,p->tickets);
+      }
+    }
+  return ttickets;
+}
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
@@ -260,7 +290,6 @@ void
 scheduler(void)
 {
   struct proc *p = 0;
-
   for(;;){
     // Enable interrupts on this processor.
     sti();
@@ -272,27 +301,38 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
-        continue;
 
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-      proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
-      p->inuse = 1;
+    int ttickets = totaltickets(); //THELEI LOCK PRIN THN KLHSH THS
+    if (ttickets>0){
+      int winnerNumero = rand()%ttickets;
 
-      swtch(&cpu->scheduler, proc->context);
-    
-      switchkvm();
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      proc = 0;
-    }
+      //cprintf("\ttick:%d",winnerNumero);
+      int count = 0;    
+      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+        if(p->state != RUNNABLE)
+          continue;
+        if((count+= p->tickets) < winnerNumero)
+          continue;
+        // Switch to chosen process.  It is the process's job
+        // to release ptable.lock and then reacquire it
+        // before jumping back to us.
+        proc = p;
+        switchuvm(p);
+        //cprintf("\n pid:%d tickets:%d \n",proc->pid , proc->tickets);
+        p->state = RUNNING;
+        p->inuse = 1;
+
+        swtch(&cpu->scheduler, proc->context);
+      
+        switchkvm();
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        proc = 0;
+        break;
+      }
+    }else{p = &ptable.proc[NPROC];}
     release(&ptable.lock);
-
+    
   }
 }
 
@@ -417,6 +457,7 @@ kill(int pid)
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->pid == pid){
       p->killed = 1;
+      p->tickets = 0;
       // Wake process from sleep if necessary.
       if(p->state == SLEEPING)
         p->state = RUNNABLE;
@@ -467,15 +508,3 @@ procdump(void)
     cprintf("\n\n");
 }
 
-static unsigned long int next = 1;  // NB: "unsigned long int" is assumed to be 32 bits wide
-
-int rand(void)  // RAND_MAX assumed to be 32767
-{
-    next = next * 1103515245 + 12345;
-    return (unsigned int) (next / 65536) % 32768;
-}
-
-void srand(unsigned int seed)
-{
-    next = seed;
-}

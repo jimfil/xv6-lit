@@ -185,10 +185,10 @@ void
 syscall(void)
 {
   int num;
-  srand(ticks);
+
   num = proc->tf->eax;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
-  inctable[num]++;
+  inctable[num-1]++;
     proc->tf->eax = syscalls[num]();
   } else {
     cprintf("%d %s: unknown sys call %d\n",
@@ -197,6 +197,3 @@ syscall(void)
   }
 }
 
-int sys_settickets(void) {
-    return -1;
-}

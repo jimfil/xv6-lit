@@ -28,6 +28,7 @@ void halt(void);
 int getpinfo(struct pstat*);
 int killrandom(void);
 int getcount(int syscall);
+void settickets(int noTickets);
 
 
 // ulib.c

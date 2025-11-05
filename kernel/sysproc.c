@@ -159,3 +159,12 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+void 
+sys_settickets(void)
+{
+  int noTickets;
+  argint(0, &noTickets);
+  proc->tickets = noTickets;
+  cprintf("pid:%d tickets%d\n",proc->pid,proc->tickets ); //debugging
+}
