@@ -304,8 +304,10 @@ scheduler(void)
 
     int ttickets = totaltickets(); //THELEI LOCK PRIN THN KLHSH THS
     if (ttickets>0){
-      int winnerNumero = rand()%ttickets+1;
-      int count = 0;    //BRES GIATI EXEI 1 TO WINNERNUMERO
+      int winnerNumero = rand()%ttickets;
+
+      //cprintf("\ttick:%d",winnerNumero);
+      int count = 0;    
       for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
         if(p->state != RUNNABLE)
           continue;
