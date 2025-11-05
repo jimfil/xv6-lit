@@ -25,14 +25,14 @@ spin(int J)
     (void)k; /* unused variable is unused :) */
 }
 
-#define N_C_PROCS 3
+#define N_C_PROCS 5
 
 /* Print information about each of the running processes */
 
 void
 print_info(struct pstat *pstat, int j)
 {
-    printf(1, "%d\t%d\t", pstat->pid[j], pstat->ticks[j]);
+    printf(1, "%d\t%d\t%d\t", pstat->pid[j], pstat->ticks[j], pstat->tickets[j]);
 
     if (pstat->inuse[j] == 1) 
     {
@@ -70,7 +70,7 @@ main(int argc, char *argv[])
 
     int pid_chds[N_C_PROCS];
 
-    int n_tickets[N_C_PROCS]={10,1,100};
+    int n_tickets[N_C_PROCS]={2,10,100,20,1};
     pid_chds[0] = getpid();
 
 #ifdef TICKETS
@@ -101,7 +101,7 @@ main(int argc, char *argv[])
     }
     printf(1, "\n");
 
-    printf(1, "PID\tTICKS\tIN USE\n");
+    printf(1, "PID\tTICKS\tIN USE\tTICKETS\n");
     
     // int n_time = atoi(argv[1]); /* You can pass the number of time-steps as a command line argument if you uncomment this. Hard-coded for now. */
     int n_time = TIMESTEPS;

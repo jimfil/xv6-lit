@@ -160,7 +160,7 @@ fork(void)
   np->sz = proc->sz;
   np->parent = proc;
   *np->tf = *proc->tf;
-  np->tickets = proc->tickets;
+  np->tickets = proc->tickets;    //tickets tou paidiou = tickets patera
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
@@ -311,7 +311,7 @@ scheduler(void)
       for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
         if(p->state != RUNNABLE)
           continue;
-        if((count+= p->tickets) < winnerNumero)
+        if((count+= p->tickets) <= winnerNumero)
           continue;
         // Switch to chosen process.  It is the process's job
         // to release ptable.lock and then reacquire it
