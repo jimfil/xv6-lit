@@ -101,7 +101,7 @@ main(int argc, char *argv[])
     }
     printf(1, "\n");
 
-    printf(1, "PID\tTICKS\tIN USE\tTICKETS\n");
+    printf(1, "PID\tTICKS\tTICKETS\tIN USE\n");
     
     // int n_time = atoi(argv[1]); /* You can pass the number of time-steps as a command line argument if you uncomment this. Hard-coded for now. */
     int n_time = TIMESTEPS;
